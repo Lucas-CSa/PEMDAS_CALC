@@ -1,101 +1,94 @@
-class Stack:
-    def __init__(self):
-        self.items = []
-        self.length = 0
+def is_operand(var):
+    return var in ('0123456789')
 
-    def push(self, val):
-        self.items.append(val)
-        self.length += 1
+def execute(nbrs):
+  if len(nbrs) < 2:
+    return nbrs
+  stack = []
+  a = 0
+  b = 0
+  r = 0
+  for i in nbrs:
+    if i == "+":
+      a = stack.pop()
+      b = stack.pop()
+      r = b + a
+      stack.append(r)
+    elif i == "-":
+      a = stack.pop()
+      b = stack.pop()
+      r = b - a
+      stack.append(r)
+    elif i == "*":
+      a = stack.pop()
+      b = stack.pop()
+      r = b * a
+      stack.append(r)
+    elif i == "/":
+      a = stack.pop()
+      b = stack.pop()
+      r = b / a
+      stack.append(r)
+    elif i == "^":
+      a = stack.pop()
+      b = stack.pop()
+      r = b ** a
+      stack.append(r)
+    else:
+      stack.append(i)
+  print(stack)
+  print(stack.pop())
 
-    def pop(self):
-        if self.empty():
-            return None
-        self.length -= 1
-        return self.items.pop()
-
-    def size(self):
-        return self.length
-
-    def peek(self):
-        if self.empty():
-            return None
-        return self.items[0]
-
-    def empty(self):
-        return self.length == 0
-
-    def __str__(self):
-        return str(self.items)
-
-    precedence = {'*': 3, '/': 3, '+': 2, '-': 2, '(': 1}
-
-
-
-
-
-def convert(expression):
-    return __convert(expression.split())
-
-
-def __convert(tokens):
-    postfix = []
-    opstack = Stack()
-
-    for token in tokens:
-        if token.isidentifier():
-            postfix.append(token)
-        elif token == '(':
-            opstack.push(token)
-        elif token == ')':
-            while True:
-                temp = opstack.pop()
-                if temp is None or temp == '(':
-                    break
-                elif not temp.isidentifier():
-                    postfix.append(temp)
-
-        else:  # must be operator
-            if not opstack.empty():
-                temp = opstack.peek()
-
-                while not opstack.empty() and precedence[temp] >= precedence[token] and token.isidentifier():
-                    postfix.append(opstack.pop())
-                    temp = opstack.peek()
-
-            opstack.push(token)
-
-    while not opstack.empty():
-        postfix.append(opstack.pop())
-
-    return postfix
-
-
-ops = {
-    "+": (lambda a, b: a + b),
-    "-": (lambda a, b: a - b),
-    "*": (lambda a, b: a * b),
-    "/": (lambda a, b: a / b),
-    "^": (lambda a, b: a ** b)
-}
-
-
-def eval(expression):
-    tokens = expression.split()
-    stack = []
-
-    for token in tokens:
-        if token in ops:
-            arg2 = stack.pop()
-            arg1 = stack.pop()
-            result = ops[token](arg1, arg2)
-            stack.append(result)
-        else:
-            stack.append(int(token))
-
-    return stack.pop()
+def analyze(line):
+    line = line.replace(" ", "")
+    line += "z"
+    line = list(line)
+    num = ""
+    nbrs = []
+    op = ""
+    oprs = []
+    print(line)
+    print(nbrs)
+    print(oprs)
+    for i in range(len(line)):
+      if(is_operand(line[i])):
+        num += line[i]
+        print(num)
+      else:
+        if num != "":
+          nbrs.append(int(num))
+          num = ""
+        op = line[i]
+        oprs.append(op)
+        if len(oprs) > 1 and oprs[len(oprs) - 1] == "*":
+          print("check order: *")
+          if oprs[len(oprs) - 2] == "^" or oprs[len(oprs) - 2] == "/":
+            print('Wrong Order')
+            nbrs.append(oprs[len(oprs) - 2])
+            del oprs[len(oprs) - 2]
+        if len(oprs) > 1 and oprs[len(oprs) - 1] == "-" or oprs[len(oprs) - 1] == "+":
+          print("Check the Order")
+          if oprs[len(oprs) - 2] == "^" or oprs[len(oprs) - 2] == "/" or oprs[len(oprs) - 2] == "*":
+            print('Wrong Order')
+            nbrs.append(oprs[len(oprs) - 2])
+            del oprs[len(oprs) - 2]
+        if len(oprs) > 1 and oprs[len(oprs) - 1] == "/":
+          print("check order: /")
+          if oprs[len(oprs) - 2] == "^" or oprs[len(oprs) - 2] == "*":
+            print('Wrong Order')
+            nbrs.append(oprs[len(oprs) - 2])
+            del oprs[len(oprs) - 2]
+    oprs.pop()
+    print(nbrs)
+    print(oprs)
+    oprs = oprs[::-1]
+    for i in oprs:
+      nbrs.append(i)
+    print(nbrs)
+    execute(nbrs)
 
 
-expression = input('Digite a expressão a ser calculada: ')
-str = (convert(expression))
-str = ' '.join(str)
-eval(str)
+
+
+expression = input('Qual expressão a ser calculada: ')
+analyze(expression)
